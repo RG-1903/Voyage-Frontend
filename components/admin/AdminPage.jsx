@@ -4,25 +4,25 @@ import { cn } from '../../utils/helpers';
 import AdminDashboard from './AdminDashboard';
 import AdminPackages from './AdminPackages';
 import AdminRequests from './AdminRequests';
-import AdminTeam from './AdminTeam';
-import AdminUserManagement from './AdminUserManagement'; // New
-import AdminResponses from './AdminResponses'; // New
+import AdminTeam from './AdminTeam'; // This component will fetch its own data now
+import AdminUserManagement from './AdminUserManagement';
+import AdminResponses from './AdminResponses';
 
-const AdminPage = ({ 
-    packages, setPackages, 
-    clientRequests, setClientRequests, 
-    teamMembers, setTeamMembers, 
-    handleLogout 
+const AdminPage = ({
+    packages, setPackages,
+    clientRequests, setClientRequests,
+    // --- REMOVED: teamMembers, setTeamMembers ---
+    handleLogout
 }) => {
     const [adminView, setAdminView] = useState('Dashboard');
-    
+
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard },
         { name: 'Packages', icon: Package },
         { name: 'Requests', icon: UserCheck },
         { name: 'Team', icon: Users },
-        { name: 'Users', icon: Users }, // New
-        { name: 'Responses', icon: MessageSquare } // New
+        { name: 'Users', icon: Users },
+        { name: 'Responses', icon: MessageSquare }
     ];
 
     const renderView = () => {
@@ -32,7 +32,8 @@ const AdminPage = ({
             case 'Requests':
                 return <AdminRequests clientRequests={clientRequests} setClientRequests={setClientRequests} />;
             case 'Team':
-                return <AdminTeam teamMembers={teamMembers} setTeamMembers={setTeamMembers} />;
+                // --- REMOVED: Props passed to AdminTeam ---
+                return <AdminTeam />;
             case 'Users':
                 return <AdminUserManagement />;
             case 'Responses':
@@ -46,6 +47,7 @@ const AdminPage = ({
     return (
         <div className="bg-slate-50 min-h-screen">
             <div className="flex">
+                {/* Sidebar (Remains the same) */}
                 <aside className="w-64 bg-white shadow-lg h-screen sticky top-0 flex flex-col border-r border-slate-200">
                     <div className="p-6 border-b border-slate-200">
                         <h1 className="text-2xl font-bold text-teal-600">Voyage Admin</h1>
@@ -72,6 +74,7 @@ const AdminPage = ({
                         </button>
                     </div>
                 </aside>
+                {/* Main Content Area (Remains the same) */}
                 <main className="flex-1 p-10">
                     <header className="mb-8">
                         <h1 className="text-3xl font-bold text-slate-800">{adminView}</h1>
