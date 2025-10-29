@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
-import Button from '../ui/Button';
-import InputField from '../ui/InputField';
+import Button from '../ui/Button'; // Path is correct
+import InputField from '../ui/InputField'; // Path is correct
+// --- FIX: Import getAssetUrl ---
+import { getAssetUrl } from '../../utils/helpers'; // Path is correct
 
 const PackageDetailsPage = ({ pkg, handleProceedToPayment, isUserAuthenticated, currentUser }) => {
+    // Component state and functions remain the same
     const [bookingDetails, setBookingDetails] = useState({ phone: '', date: '', guests: 2, requests: '' });
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -29,6 +32,7 @@ const PackageDetailsPage = ({ pkg, handleProceedToPayment, isUserAuthenticated, 
         handleProceedToPayment(fullBookingData);
     };
 
+
     return (
         <div className="bg-white pt-32 pb-20">
             <div className="container mx-auto px-6">
@@ -37,12 +41,14 @@ const PackageDetailsPage = ({ pkg, handleProceedToPayment, isUserAuthenticated, 
                 </button>
                 <div className="grid lg:grid-cols-5 gap-12">
                     <div className="lg:col-span-3">
-                        <motion.img 
-                            initial={{ opacity: 0 }} 
-                            animate={{ opacity: 1 }} 
-                            src={pkg.image && pkg.image.startsWith('http') ? pkg.image : `http://localhost:5001/${pkg.image}`} 
-                            alt={pkg.title} 
-                            className="w-full h-auto object-cover rounded-2xl shadow-2xl mb-8" 
+                        <motion.img
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            // --- FIX: Use getAssetUrl ---
+                            src={getAssetUrl(pkg.image)}
+                            alt={pkg.title}
+                            className="w-full h-auto object-cover rounded-2xl shadow-2xl mb-8"
+                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/1200x800/cccccc/ffffff?text=Image+Error'; }}
                         />
                         <h1 className="text-4xl font-bold mb-4 text-slate-800">{pkg.title}</h1>
                         <p className="text-lg text-slate-600 mb-6">{pkg.description}</p>
@@ -52,7 +58,8 @@ const PackageDetailsPage = ({ pkg, handleProceedToPayment, isUserAuthenticated, 
                         </ul>
                     </div>
                     <div className="lg:col-span-2">
-                        <div className="bg-slate-50 p-8 rounded-xl shadow-lg sticky top-28">
+                        {/* Booking form remains the same */}
+                         <div className="bg-slate-50 p-8 rounded-xl shadow-lg sticky top-28">
                             <h2 className="text-3xl font-bold mb-2 text-slate-800">Book Your Trip</h2>
                              <div className="text-3xl font-bold text-teal-600 mb-6">
                                 ₹{pkg.price.toLocaleString('en-IN')}
@@ -60,7 +67,6 @@ const PackageDetailsPage = ({ pkg, handleProceedToPayment, isUserAuthenticated, 
                             </div>
                             <form onSubmit={handleSubmitToPayment} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
-                                    {/* FIX: Added the 'min' attribute to the date input */}
                                     <InputField label="Travel Date" name="date" type="date" value={bookingDetails.date} onChange={handleChange} required min={today} />
                                     <InputField label="Guests" name="guests" type="number" min="1" value={bookingDetails.guests} onChange={handleChange} required />
                                 </div>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import apiClient from '../../api/apiClient';
+import apiClient from '../../api/apiClient'; // Path is correct
 import { Edit, Camera, Package, Calendar, Users, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { cn } from '../../utils/helpers';
-import ProfileEditModal from '../ui/ProfileEditModal';
+// --- FIX: Import cn and getAssetUrl ---
+import { cn, getAssetUrl } from '../../utils/helpers'; // Path is correct
+import ProfileEditModal from '../ui/ProfileEditModal'; // Path is correct
 
 const BookingCard = ({ booking }) => {
+    // BookingCard definition remains the same
     const getStatusClasses = (status) => {
         switch (status) {
             case 'Approved': return 'bg-green-100 text-green-800';
@@ -39,6 +41,7 @@ const MyProfilePage = ({ onProfileUpdate }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const fetchData = async () => {
+        // fetchData remains the same
         try {
             const [profileRes, bookingsRes] = await Promise.all([
                 apiClient.get('/profile'),
@@ -83,7 +86,9 @@ const MyProfilePage = ({ onProfileUpdate }) => {
                     <div className="md:flex items-center gap-8 bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto md:mx-0 mb-6 md:mb-0 flex-shrink-0 group">
                             <img
-                                src={`http://localhost:5001/${profile.profileImage}?key=${Date.now()}`}
+                                // --- FIX: Use getAssetUrl and add key for cache busting ---
+                                key={Date.now()} // Force re-render after update
+                                src={getAssetUrl(profile.profileImage)}
                                 alt="Profile"
                                 className="w-full h-full rounded-full object-cover border-4 border-teal-500"
                             />

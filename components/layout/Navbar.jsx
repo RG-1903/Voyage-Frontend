@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { cn } from '../../utils/helpers';
+import { cn, getAssetUrl } from '../../utils/helpers';
 import Button from '../ui/Button';
 import { UserCircle, ChevronDown } from 'lucide-react';
 
@@ -64,7 +64,7 @@ const Navbar = ({ isUserAuthenticated, isAdminAuthenticated, currentUser, userPr
                         <div className="hidden md:flex items-center gap-4 relative">
                             <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)} className={cn("flex items-center gap-2 cursor-pointer font-semibold", isOverHero ? "text-white" : "text-slate-700")}>
                                 {userProfile && userProfile.profileImage ? (
-                                    <img src={`http://localhost:5001/${userProfile.profileImage}`} alt=" " className="w-8 h-8 rounded-full object-cover border-2 border-teal-100" />
+                                    <img src={getAssetUrl(userProfile.profileImage)} alt=" " className="w-8 h-8 rounded-full object-cover border-2 border-teal-100" />
                                 ) : ( <UserCircle /> )}
                                 <span>Hi, {currentUser?.name.split(' ')[0]}!</span>
                                 <ChevronDown size={18} className={cn("transition-transform", isDropdownOpen && "rotate-180")} />

@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Star, ArrowRight } from 'lucide-react';
+// --- FIX: Import getAssetUrl ---
+import { getAssetUrl } from '../../utils/helpers'; // Path is correct
 
 const PackageCard = ({ pkg, index, onViewDetails }) => (
     <motion.div
@@ -12,7 +14,8 @@ const PackageCard = ({ pkg, index, onViewDetails }) => (
     >
         <div className="relative overflow-hidden">
             <img
-                src={pkg.image.startsWith('http') ? pkg.image : `http://localhost:5001/${pkg.image}`}
+                // --- FIX: Use getAssetUrl ---
+                src={getAssetUrl(pkg.image)}
                 alt={pkg.title}
                 className="w-full h-60 object-cover group-hover:scale-110 transition-transform duration-500"
                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x400/cccccc/ffffff?text=Image+Error'; }}

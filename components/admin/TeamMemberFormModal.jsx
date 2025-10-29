@@ -1,27 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload } from 'lucide-react';
-import InputField from '../ui/InputField';
+import InputField from '../ui/InputField'; // Adjusted path
+// --- FIX: Import getAssetUrl ---
+import { getAssetUrl } from '../../utils/helpers'; // Adjusted path
 
 const TeamMemberFormModal = ({ isOpen, onClose, onSave, memberToEdit }) => {
     const [formData, setFormData] = useState({ name: '', title: '', imageFile: null });
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
 
-    useEffect(() => { 
+    useEffect(() => {
         if (isOpen) {
-            if (memberToEdit) { 
+            if (memberToEdit) {
                 setFormData(memberToEdit);
-                setImagePreview(memberToEdit.image ? `http://localhost:5001/${memberToEdit.image}` : null);
-            } else { 
+                // --- FIX: Use getAssetUrl ---
+                setImagePreview(memberToEdit.image ? getAssetUrl(memberToEdit.image) : null);
+            } else {
                 setFormData({ name: '', title: '', imageFile: null });
                 setImagePreview(null);
             }
         }
     }, [memberToEdit, isOpen]);
 
-    const handleChange = (e) => { 
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value })); 
+    const handleChange = (e) => {
+        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
     const handleFileChange = (e) => {
@@ -59,7 +62,7 @@ const TeamMemberFormModal = ({ isOpen, onClose, onSave, memberToEdit }) => {
                                         <div className="w-24 h-24 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center">
                                             {imagePreview ? <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" /> : <span className="text-xs text-slate-500">No Image</span>}
                                         </div>
-                                        <button type="button" onClick={() => fileInputRef.current.click()} className="px-4 py-2 text-sm font-semibold text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200">
+                                        <button type="button" onClick={() => fileInputRef.current?.click()} className="px-4 py-2 text-sm font-semibold text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200">
                                             <Upload size={16} className="inline mr-2"/> Upload Image
                                         </button>
                                         <input ref={fileInputRef} type="file" name="imageFile" onChange={handleFileChange} className="hidden" accept="image/*" />

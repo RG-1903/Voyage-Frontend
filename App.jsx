@@ -56,14 +56,14 @@ export default function App() {
     const loadPublicData = async () => {
       setIsLoading(true);
       try {
-        const [pkgsRes, testsRes, teamRes] = await Promise.all([
+        const [pkgsRes, testsRes, teamRes] = await Promise.allSettled([
           apiClient.get('/packages'),
           apiClient.get('/testimonials'),
           apiClient.get('/teams')
         ]);
-        setPackages(pkgsRes.data);
-        setTestimonials(testsRes.data);
-        setTeamMembers(teamRes.data);
+        if (pkgsRes.status === 'fulfilled') setPackages(pkgsRes.value.data); else setPackages([]);
+        if (testsRes.status === 'fulfilled') setTestimonials(testsRes.value.data); else setTestimonials([]);
+        if (teamRes.status === 'fulfilled') setTeamMembers(teamRes.value.data); else setTeamMembers([]);
       } catch (error) { console.error("Failed to load public data", error); }
       finally { setIsLoading(false); }
     };

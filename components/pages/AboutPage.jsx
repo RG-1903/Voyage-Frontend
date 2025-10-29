@@ -1,13 +1,15 @@
 import React from 'react';
 import { Target, Building } from 'lucide-react';
 import { motion } from 'framer-motion';
+// --- FIX: Import getAssetUrl ---
+import { getAssetUrl } from '../../utils/helpers'; // Path is correct
 
 const AboutPage = ({ teamMembers }) => (
     <div className="pt-32 pb-24 bg-white min-h-screen">
         <div className="container mx-auto px-6">
             <h1 className="text-5xl font-extrabold text-center mb-6 text-slate-800">About Voyage</h1>
             <p className="text-xl text-slate-600 text-center mb-16 max-w-3xl mx-auto">We believe travel is more than just seeing new places. It's about creating lasting memories, forging new connections, and discovering yourself along the way.</p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-24">
                 <div>
                     <img src="https://images.unsplash.com/photo-1522199755839-a2bacb67c546?q=80&w=2072&auto=format&fit=crop" alt="Our Story" className="rounded-2xl shadow-2xl"/>
@@ -22,7 +24,6 @@ const AboutPage = ({ teamMembers }) => (
 
             <h2 className="text-4xl font-bold text-center mb-12 text-slate-800">Meet Our Team</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-                {/* Dynamically render team members from the database */}
                 {(teamMembers || []).map((member, i) => (
                     <motion.div
                         key={member._id}
@@ -33,9 +34,10 @@ const AboutPage = ({ teamMembers }) => (
                         className="group"
                     >
                         <div className="relative overflow-hidden rounded-2xl">
-                            <img 
-                                src={`http://localhost:5001/${member.image}`} 
-                                alt={member.name} 
+                            <img
+                                // --- FIX: Use getAssetUrl ---
+                                src={getAssetUrl(member.image)}
+                                alt={member.name}
                                 className="w-full h-80 object-cover rounded-2xl shadow-lg transition-transform duration-500 group-hover:scale-110"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>

@@ -1,7 +1,10 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../utils/helpers';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5001/api',
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: { 'Accept': 'application/json' },
 });
 
 // Interceptor to attach the correct auth token from sessionStorage
@@ -13,4 +16,4 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-export default apiClient;
+export default apiClient;// touch to trigger HMR

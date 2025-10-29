@@ -1,12 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload } from 'lucide-react';
-import apiClient from '../../api/apiClient';
+import apiClient from '../../api/apiClient'; // Path is correct
 import InputField from './InputField';
 import Button from './Button';
+// --- FIX: Import getAssetUrl ---
+import { getAssetUrl } from '../../utils/helpers'; // Path is correct
 
 const ProfileEditModal = ({ isOpen, onClose, currentUser, onProfileUpdate }) => {
-    const [formData, setFormData] = useState({ name: currentUser.name, bio: currentUser.bio });
+    // FIX: Initialize state correctly when currentUser is loaded
+    const [formData, setFormData] = useState({ name: '', bio: '' });
     const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const [profileImageFile, setProfileImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -14,9 +17,21 @@ const ProfileEditModal = ({ isOpen, onClose, currentUser, onProfileUpdate }) => 
     const [success, setSuccess] = useState('');
     const fileInputRef = useRef(null);
 
+    // FIX: Update state when currentUser or isOpen changes
+    useEffect(() => {
+        if (isOpen && currentUser) {
+            setFormData({ name: currentUser.name || '', bio: currentUser.bio || '' });
+            setImagePreview(null); // Reset preview
+            setProfileImageFile(null); // Reset file
+            setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' }); // Reset passwords
+            setError('');
+            setSuccess('');
+        }
+    }, [isOpen, currentUser]);
+
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
     const handlePasswordChange = (e) => setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
-    
+
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -24,7 +39,7 @@ const ProfileEditModal = ({ isOpen, onClose, currentUser, onProfileUpdate }) => 
             setImagePreview(URL.createObjectURL(file));
         }
     };
-    
+
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -37,8 +52,12 @@ const ProfileEditModal = ({ isOpen, onClose, currentUser, onProfileUpdate }) => 
         }
         try {
             const { data: updatedProfile } = await apiClient.post('/profile/update', data);
-            onProfileUpdate(updatedProfile);
+            onProfileUpdate(updatedProfile); // Callback to update App state
             setSuccess('Profile updated successfully!');
+            // Reset file input state after successful upload
+            setProfileImageFile(null);
+            setImagePreview(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             setError(err.response?.data?.msg || 'Failed to update profile.');
@@ -65,7 +84,7 @@ const ProfileEditModal = ({ isOpen, onClose, currentUser, onProfileUpdate }) => 
         }
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !currentUser) return null; // Ensure currentUser exists
 
     return (
         <AnimatePresence>
@@ -78,12 +97,16 @@ const ProfileEditModal = ({ isOpen, onClose, currentUser, onProfileUpdate }) => 
                         </div>
                         {error && <p className="text-red-500 bg-red-50 p-3 rounded-md text-sm mb-4">{error}</p>}
                         {success && <p className="text-green-600 bg-green-50 p-3 rounded-md text-sm mb-4">{success}</p>}
-                        
-                        {/* Profile Details Form */}
+
                         <form onSubmit={handleProfileSubmit} className="space-y-4">
                             <div className="flex items-center gap-4">
-                                <img src={imagePreview || `http://localhost:5001/${currentUser.profileImage}`} alt="Avatar" className="w-20 h-20 rounded-full object-cover"/>
-                                <button type="button" onClick={() => fileInputRef.current.click()} className="flex items-center px-4 py-2 text-sm font-semibold text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200">
+                                <img
+                                    // --- FIX: Use getAssetUrl, prioritize local preview ---
+                                    src={imagePreview || getAssetUrl(currentUser.profileImage)}
+                                    alt="Avatar"
+                                    className="w-20 h-20 rounded-full object-cover"
+                                />
+                                <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center px-4 py-2 text-sm font-semibold text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200">
                                     <Upload size={16} className="mr-2"/> Change Photo
                                 </button>
                                 <input ref={fileInputRef} type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
@@ -97,10 +120,9 @@ const ProfileEditModal = ({ isOpen, onClose, currentUser, onProfileUpdate }) => 
                                 <Button type="submit">Save Profile</Button>
                             </div>
                         </form>
-                        
+
                         <hr className="my-8"/>
 
-                        {/* Change Password Form */}
                         <h3 className="text-xl font-bold text-gray-700 mb-4">Change Password</h3>
                         <form onSubmit={handlePasswordSubmit} className="space-y-4">
                              <InputField label="Current Password" name="currentPassword" type="password" value={passwordData.currentPassword} onChange={handlePasswordChange} required />

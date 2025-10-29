@@ -5,6 +5,26 @@
  */
 export const cn = (...classes) => classes.filter(Boolean).join(' ');
 
+// --- FIX: Ensure this matches your Vercel backend deployment URL ---
+export const BACKEND_BASE_URL = 'https://voyage-backend-five.vercel.app'; // Replace if your URL is different
+export const API_BASE_URL = `${BACKEND_BASE_URL}/api`;
+
+/**
+ * Constructs the absolute URL for an asset hosted by the backend.
+ * Handles both relative paths (like 'uploads/...') and potentially absolute URLs already stored.
+ * @param {string} path - The path or URL from the database (e.g., 'uploads/image.jpg').
+ * @returns {string} The full absolute URL (e.g., 'https://your-backend.vercel.app/uploads/image.jpg').
+ */
+export const getAssetUrl = (path) => {
+    if (!path) return ''; // Return empty string if path is missing
+    // If it's already an absolute URL, return it directly
+    if (/^https?:\/\//i.test(path)) return path;
+    // Remove leading slash if present, then join with the backend base URL
+    const normalized = String(path).replace(/^\/+/, '');
+    return `${BACKEND_BASE_URL}/${normalized}`;
+};
+
+
 /**
  * Decodes a JSON Web Token (JWT) to extract its payload.
  * This is a simple, client-side decoder and does NOT verify the token's signature.
