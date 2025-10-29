@@ -1,19 +1,27 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../utils/helpers';
+
+// --- ADDED: Get Backend API URL from Vercel Environment Variable ---
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: { 'Accept': 'application/json' },
+  baseURL: `${API_URL}/api`, // Use the variable here
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Interceptor to attach the correct auth token from sessionStorage
-apiClient.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('adminAuthToken') || sessionStorage.getItem('userAuthToken');
-  if (token) {
-    config.headers['x-auth-token'] = token;
+// Interceptor to add the auth token to every request
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = sessionStorage.getItem('adminAuthToken') || sessionStorage.getItem('userAuthToken');
+    if (token) {
+      config.headers['x-auth-token'] = token;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
-export default apiClient;// touch to trigger HMR
+export default apiClient;

@@ -17,6 +17,10 @@ import AdminPage from './components/admin/AdminPage';
 import MyBookingsPage from './components/pages/MyBookingsPage';
 import PaymentPage from './components/pages/PaymentPage';
 import MyProfilePage from './components/pages/MyProfilePage';
+// --- ADDED: New Admin Password Reset Components ---
+import AdminForgotPasswordPage from './components/auth/AdminForgotPasswordPage';
+import AdminResetPasswordPage from './components/auth/AdminResetPasswordPage';
+
 
 // --- Protected Route Components (Remain the same) ---
 const UserProtectedRoute = ({ isUserAuthenticated, children }) => {
@@ -30,13 +34,12 @@ const AdminProtectedRoute = ({ isAdminAuthenticated, children }) => {
 
 export default function App() {
   const [packages, setPackages] = useState([]);
-  const [clientRequests, setClientRequests] = useState([]); // Keep for Admin
-  // --- REMOVED: Testimonials and Team state here ---
+  const [clientRequests, setClientRequests] = useState([]); 
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(!!sessionStorage.getItem('adminAuthToken'));
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(!sessionStorage.getItem('adminAuthToken') && !!sessionStorage.getItem('userAuthToken'));
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // Still used for initial package load
+  const [isLoading, setIsLoading] = useState(true); 
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [bookingDataForPayment, setBookingDataForPayment] = useState(null);
   const navigate = useNavigate();
@@ -58,24 +61,22 @@ export default function App() {
     const loadInitialData = async () => {
       setIsLoading(true);
       try {
-        // --- Only fetch packages initially ---
         const pkgsRes = await apiClient.get('/packages');
         setPackages(pkgsRes.data);
       } catch (error) {
         console.error("Failed to load initial package data", error);
-        setPackages([]); // Set empty array on error
+        setPackages([]); 
       } finally {
         setIsLoading(false);
       }
     };
     loadInitialData();
-  }, []); // Run only once on mount
+  }, []); 
 
   // --- Admin Data Load (Only requests now) ---
   useEffect(() => {
     if (isAdminAuthenticated) {
       apiClient.get('/requests').then(res => setClientRequests(res.data)).catch(err => console.error("Failed to load admin requests data", err));
-      // Packages are already loaded initially, others loaded in specific admin components
     }
   }, [isAdminAuthenticated]);
 
@@ -93,7 +94,7 @@ export default function App() {
     if (isAdminAuthenticated && !location.pathname.startsWith('/admin')) {
         navigate('/admin', { replace: true });
     }
-    if (isUserAuthenticated && ['/landing', '/login', '/register'].includes(location.pathname)) {
+    if (isUserAuthenticated && ['/landing', '/login', '/register', '/admin/login', '/admin/forgot-password', '/admin/reset-password'].includes(location.pathname)) {
         navigate('/', { replace: true });
     }
   }, [location.pathname, isAdminAuthenticated, isUserAuthenticated, navigate]);
@@ -106,8 +107,7 @@ export default function App() {
   const handleProceedToPayment = (bd) => { setBookingDataForPayment(bd); navigate('/payment'); };
   const handleProfileUpdate = (up) => { setUserProfile(up); };
   const handleAddRequest = async (d) => { await apiClient.post('/requests/add', d); };
-  // Keep handleAddTestimonial logic, it will be passed down to HomePage
-  const handleAddTestimonial = async (d) => { await apiClient.post('/testimonials/add', d); /* Optionally refetch testimonials on HomePage after adding */ };
+  const handleAddTestimonial = async (d) => { await apiClient.post('/testimonials/add', d); };
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-teal-500"></div></div>
@@ -118,10 +118,8 @@ export default function App() {
       <Routes location={location} key={location.pathname}>
         {/* --- Layout Routes --- */}
         <Route element={<Layout userProfile={userProfile} handleLogout={handleLogout} isUserAuthenticated={isUserAuthenticated} isAdminAuthenticated={isAdminAuthenticated} currentUser={currentUser} />}>
-          {/* HomePage now fetches its own testimonials */}
           <Route path="/" element={<HomePage onViewDetails={handleViewDetails} packages={packages} handleAddTestimonial={handleAddTestimonial} currentUser={currentUser} isUserAuthenticated={isUserAuthenticated} />} />
           <Route path="/packages" element={<PackagesPage packages={packages} onViewDetails={handleViewDetails} />} />
-          {/* AboutPage now fetches its own data */}
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/package-details" element={selectedPackage ? <PackageDetailsPage pkg={selectedPackage} handleProceedToPayment={handleProceedToPayment} isUserAuthenticated={isUserAuthenticated} currentUser={currentUser} /> : <Navigate to="/packages" />} />
@@ -130,22 +128,26 @@ export default function App() {
           <Route path="/payment" element={bookingDataForPayment ? <UserProtectedRoute isUserAuthenticated={isUserAuthenticated}><PaymentPage bookingData={bookingDataForPayment} handleAddRequest={handleAddRequest} /></UserProtectedRoute> : <Navigate to="/packages" />} />
         </Route>
 
-        {/* --- Standalone Routes (Remain the same) --- */}
+        {/* --- Standalone Routes --- */}
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<UserLoginPage handleUserLogin={handleUserLogin} />} />
         <Route path="/register" element={<UserRegisterPage />} />
         <Route path="/admin/login" element={<AdminLoginPage handleLogin={handleAdminLogin} />} />
+        
+        {/* --- ADDED: New Admin Password Reset Routes --- */}
+        <Route path="/admin/forgot-password" element={<AdminForgotPasswordPage />} />
+        <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
+
 
         {/* Admin Section (Props adjusted) */}
         <Route path="/admin/*" element={
           <AdminProtectedRoute isAdminAuthenticated={isAdminAuthenticated}>
             <AdminPage
               handleLogout={handleLogout}
-              packages={packages} // Still pass packages from initial load
-              setPackages={setPackages} // Allow AdminPackages to update
-              clientRequests={clientRequests} // Pass requests fetched for admin
-              setClientRequests={setClientRequests} // Allow AdminRequests to update
-              // TeamMembers are now fetched within AdminTeam
+              packages={packages} 
+              setPackages={setPackages} 
+              clientRequests={clientRequests} 
+              setClientRequests={setClientRequests} 
             />
           </AdminProtectedRoute>
         } />
