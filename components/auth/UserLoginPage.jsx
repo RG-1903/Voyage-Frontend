@@ -1,9 +1,13 @@
+/*
+* FILE: src/components/auth/UserLoginPage.jsx
+* UPDATED: Corrected API endpoint and loading/error logic.
+*/
 import React, { useState} from 'react';
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom' // Import the Link component
+import { Link } from 'react-router-dom' 
 import apiClient from '../../api/apiClient'
 import Button from '../ui/Button'
-import { User, Mail, Lock } from 'lucide-react'
+import { User, Mail, Lock, Loader2, AlertCircle } from 'lucide-react' // Added Loader2 and AlertCircle
 
 const UserLoginPage = ({ handleUserLogin }) => {
   const [email, setEmail] = useState('')
@@ -16,13 +20,13 @@ const UserLoginPage = ({ handleUserLogin }) => {
     setIsLoading(true)
     setError('')
     try {
-      const { data } = await apiClient.post('/users/login', { email, password })
+      // --- FIX: Corrected API endpoint ---
+      const { data } = await apiClient.post('/auth/login', { email, password }) 
       handleUserLogin(data.token)
       // Navigation is now handled in App.jsx after successful login
     } catch (err) {
       setError(err.response?.data?.msg || 'Invalid email or password.')
-    } finally {
-      setIsLoading(false)
+      setIsLoading(false) // Keep loading false on error
     }
   }
 
@@ -38,6 +42,7 @@ const UserLoginPage = ({ handleUserLogin }) => {
 
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex items-center justify-center p-6">
+      {/* Background */}
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center animate-ken-burns"
@@ -49,6 +54,7 @@ const UserLoginPage = ({ handleUserLogin }) => {
         <div className="absolute inset-0 bg-black/50" />
       </div>
 
+      {/* Modal Card */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -69,8 +75,12 @@ const UserLoginPage = ({ handleUserLogin }) => {
           className="space-y-6"
         >
           {error && (
-            <motion.p className="bg-red-500/30 border border-red-500/50 text-white text-center p-3 rounded-lg text-sm">
-              {error}
+            <motion.p 
+              initial={{opacity: 0}} 
+              animate={{opacity: 1}} 
+              className="flex items-center justify-center gap-2 bg-red-500/30 border border-red-500/50 text-white text-center p-3 rounded-lg text-sm"
+            >
+              <AlertCircle size={16} /> {error}
             </motion.p>
           )}
           <motion.div variants={itemVariants} className="relative">
@@ -109,13 +119,16 @@ const UserLoginPage = ({ handleUserLogin }) => {
               className="w-full text-lg bg-teal-600 text-white hover:bg-teal-500 shadow-lg shadow-teal-500/30 py-3"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? (
+                <Loader2 className="animate-spin mx-auto" />
+              ) : (
+                'Sign In'
+              )}
             </Button>
           </motion.div>
         </motion.form>
         <p className="text-center text-sm text-slate-300 mt-8">
           Don't have an account?{' '}
-          {/* FIX: Replaced the old <a> tag with the <Link> component */}
           <Link
             to="/register"
             className="font-semibold text-teal-300 hover:text-teal-200 hover:underline"
