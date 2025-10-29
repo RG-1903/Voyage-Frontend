@@ -1,13 +1,13 @@
 /*
 * FILE: src/components/auth/AdminLoginPage.jsx
-* REBUILT: Now matches your theme but with a RED color scheme.
+* UPDATED: Added console.log for debugging
 */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Key, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import apiClient from '../../api/apiClient';
-import Button from '../ui/Button'; // Assuming Button component is in this path
+import Button from '../ui/Button';
 
 const AdminLoginPage = ({ handleLogin }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
@@ -17,18 +17,36 @@ const AdminLoginPage = ({ handleLogin }) => {
     const { username, password } = formData;
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+    // --- UPDATED onSubmit ---
     const onSubmit = async e => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
+
+        // --- DEBUG: Log the data being sent ---
+        console.log("Attempting admin login with:", { username, password }); 
+        // ------------------------------------
+
         try {
             const res = await apiClient.post('/auth/admin', { username, password });
+
+            // --- DEBUG: Log the successful response ---
+            console.log("Admin login successful:", res.data);
+            // ---------------------------------------
+
             handleLogin(res.data.token);
         } catch (err) {
+            
+            // --- DEBUG: Log the error details ---
+            console.error("Admin login failed:", err.response?.data || err.message);
+            // -----------------------------------
+
             setError(err.response?.data?.msg || 'Login Failed. Please try again.');
             setIsLoading(false);
         }
     };
+    // --- End of UPDATED onSubmit ---
+
 
     const formVariants = {
       hidden: { opacity: 0, y: 20 },
