@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect } from 'react'; 
 import { motion } from 'framer-motion';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import apiClient from '../../api/apiClient';
 import Button from '../ui/Button';
 import TeamMemberFormModal from './TeamMemberFormModal';
-import AdminTeamMemberCard from './AdminTeamMemberCard'; // Assuming you created this component
+import AdminTeamMemberCard from './AdminTeamMemberCard'; 
 
-// --- REMOVED: Props teamMembers, setTeamMembers ---
 const AdminTeam = () => {
-    // --- ADDED: State for team members and loading ---
     const [teamMembers, setTeamMembers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [memberToEdit, setMemberToEdit] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    // --- ADDED: Fetch team members ---
     useEffect(() => {
         const fetchTeamMembers = async () => {
             setIsLoading(true);
@@ -48,14 +45,27 @@ const AdminTeam = () => {
         const data = new FormData();
         Object.keys(formData).forEach(key => data.append(key, formData[key]));
 
+        // --- !! THIS IS THE FIX !! ---
+        // We must manually get the token and set the headers for multipart requests
+        const token = sessionStorage.getItem('adminAuthToken');
+        const config = {
+            headers: { 
+                'Content-Type': 'multipart/form-data',
+                'x-auth-token': token // Manually add the token
+            }
+        };
+        // --- End of Fix ---
+
         try {
             let updatedMember;
             if (formData._id) {
-                const res = await apiClient.post(`/teams/update/${formData._id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+                // Pass the config object to the post request
+                const res = await apiClient.post(`/teams/update/${formData._id}`, data, config);
                 updatedMember = res.data;
                 setTeamMembers(prev => prev.map(m => m._id === updatedMember._id ? updatedMember : m));
             } else {
-                const res = await apiClient.post('/teams/add', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+                // Pass the config object to the post request
+                const res = await apiClient.post('/teams/add', data, config);
                 updatedMember = res.data;
                 setTeamMembers(prev => [...prev, updatedMember]);
             }
@@ -90,7 +100,7 @@ const AdminTeam = () => {
 
     return (
         <div>
-            {/* Search and Add Button (Remains the same) */}
+            {/* Search and Add Button */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                  <div className="relative w-full md:w-1/3">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -122,5 +132,4 @@ const AdminTeam = () => {
         </div>
     );
 };
-
 export default AdminTeam;
